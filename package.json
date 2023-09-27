@@ -18,7 +18,8 @@
   ],
   "scripts": {
     "build": "tsup",
-    "test": "jest"
+    "test": "jest",
+    "publish": "npm publish --access public"
   },
   "repository": {
     "type": "git",
