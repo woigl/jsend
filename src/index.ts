@@ -181,12 +181,10 @@ export const jSend = {
       },
 
       sendSuccess: function (data: any, httpStatusCode?: number) {
-        console.log("Calling Success");
         res.status(httpStatusCode || 200).json(jSend.success(data));
       },
 
       sendFail: function (data: any, httpStatusCode?: number) {
-        console.log("Calling Fail");
         res.status(httpStatusCode || 400).json(jSend.fail(data));
       },
 
@@ -195,7 +193,6 @@ export const jSend = {
         optional?: { code?: number; data?: any },
         httpStatusCode?: number
       ) {
-        console.log("Calling Error");
         res.status(httpStatusCode || 500).json(jSend.error(message, optional));
       },
     };
