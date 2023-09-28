@@ -12,7 +12,7 @@ npm install -S @woigl/jsend
 
 ## Response Creation
 
-Responses can be created using the success, fail, and error methods:
+Responses can be created using the `success`, `fail`, and `error` methods:
 
 ```typescript
 // You can pass any data or a JSend response to success
@@ -44,7 +44,7 @@ jSend.error({
 
 ### HTTP Middleware
 
-The jSend HTTP middleware provides methods for easily sending "success", "fail" and "error" responses and optionally allows to specify HTTP status codes:
+The jSend HTTP middleware provides methods for easily sending "success", "fail" and "error" responses and optionally allows to specify [HTTP response status codes](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status):
 
 ```typescript
 expressApp.use(jSend.middleware);
@@ -87,6 +87,28 @@ jSend.isValid({
 });
 ```
 
+Using `jSendStrict.isValid` instead of `jSend.isValid` causes to also validate that extraneous properties do not exist.
+
+```typescript
+// Returns true
+jSend.isValid({
+  status: "success",
+  data: { foo: "bar" },
+});
+
+// Returns false
+jSend.isValid({
+  status: "success",
+});
+
+// Returns false
+jSend.isValid({
+  status: "success",
+  data: { foo: "bar" },
+  junk: "is ok",
+});
+```
+
 ### Validate if Response is "success"
 
 You can also check if a response is a "success" response.
@@ -105,6 +127,8 @@ jSend.isSuccess({
 });
 ```
 
+Use `jSendStrict` to check with strict mode enabled.
+
 ### Validate if Response is "fail"
 
 You can also check if a response is a "fail" response.
@@ -122,6 +146,8 @@ jSend.isFail({
   data: { stack: "..." },
 });
 ```
+
+Use `jSendStrict` to check with strict mode enabled.
 
 ### Validate if Response is "error"
 
@@ -142,6 +168,8 @@ jSend.isError({
   data: { foo: "bar" },
 });
 ```
+
+Use `jSendStrict` to check with strict mode enabled.
 
 ## Bugs, Feature Requests, Questions and so on...
 
