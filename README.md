@@ -151,7 +151,7 @@ If you want to improve the code, then you can start straight with a pull request
 
 ## Expression of Gratitude
 
-I would like to express my gratitude towards [Matt Dunlap](https://www.npmjs.com/~prestaul), who is the maintainer of the [jsend](https://www.npmjs.com/package/jsend) package. Unfortunately, the package did not satisfy my needs in terms of Typescript support and HTTP status codes. Therefore I've decided to develop a slightly similar library. Once again, thanks to Matt for his great work!
+I would like to express my gratitude towards [Matt Dunlap](https://www.npmjs.com/~prestaul), who is the maintainer of the [jsend NPM package](https://www.npmjs.com/package/jsend). Unfortunately, the package did not satisfy my needs in terms of Typescript support and HTTP status codes. Therefore I've decided to develop a slightly similar library. Once again, thanks to Matt for his great work!
 
 ## License
 
