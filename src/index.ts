@@ -15,16 +15,20 @@ export type JSendFail = {
 };
 
 /** jSend error object. */
-export type JSendError = {
-  /** Should always be set to "error". */
-  status: "error";
+export interface JSendErrorData {
   /** A meaningful, end-user-readable (or at the least log-worthy) message, explaining what went wrong. */
   message: string;
   /** A numeric code corresponding to the error, if applicable. */
   code?: number;
   /** A generic container for any other information about the error, i.e. the conditions that caused the error, stack traces, etc. */
   data?: any;
-};
+}
+
+/** jSend error object. */
+export interface JSendError extends JSendErrorData {
+  /** Should always be set to "error". */
+  status: "error";
+}
 
 /** Union of `JSendSuccess`, `JSendFail`, and `JSendError`. */
 export type JSend = JSendSuccess | JSendFail | JSendError;
@@ -59,8 +63,7 @@ export type JSendMiddleware = {
    * @param httpStatusCode The HTTP status code (suppose to be in the 5xx range). If not defined then 500 will be used.
    */
   sendError: (
-    message: string,
-    optional?: { code?: number; data?: any },
+    messageOrErrorData: string | JSendErrorData,
     httpStatusCode?: number
   ) => void;
 };
@@ -97,21 +100,20 @@ export const jSend = {
    * @param optional Additional optional information of the error.
    * @returns
    */
-  error: function (
-    message: string,
-    optional?: {
-      /** A numeric code corresponding to the error, if applicable. */
-      code?: number;
-      /** A generic container for any other information about the error, i.e. the conditions that caused the error, stack traces, etc. */
-      data?: any;
+  error: function (messageOrErrorData: string | JSendErrorData): JSendError {
+    if (typeof messageOrErrorData === "string") {
+      return {
+        status: "error",
+        message: messageOrErrorData,
+      };
+    } else {
+      return {
+        status: "error",
+        message: messageOrErrorData.message,
+        ...(messageOrErrorData.code && { code: messageOrErrorData.code }),
+        ...(messageOrErrorData.data && { data: messageOrErrorData.data }),
+      };
     }
-  ): JSendError {
-    return {
-      status: "error",
-      message,
-      ...(optional?.code && { code: optional.code }),
-      ...(optional?.data && { data: optional.data }),
-    };
   },
 
   /**
@@ -189,11 +191,10 @@ export const jSend = {
       },
 
       sendError: function (
-        message: string,
-        optional?: { code?: number; data?: any },
+        messageOrErrorData: string | JSendErrorData,
         httpStatusCode?: number
       ) {
-        res.status(httpStatusCode || 500).json(jSend.error(message, optional));
+        res.status(httpStatusCode || 500).json(jSend.error(messageOrErrorData));
       },
     };
 
