@@ -8,7 +8,9 @@
     "status",
     "typescript",
     "javascript",
-    "nodejs"
+    "nodejs",
+    "middleware",
+    "express"
   ],
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
