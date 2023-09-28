@@ -1,6 +1,6 @@
 {
   "name": "@woigl/jsend",
-  "version": "0.1.2",
+  "version": "1.0.0",
   "description": "Typescript and Javascript utilities for creating and checking JSend object.",
   "keywords": [
     "jsend",
