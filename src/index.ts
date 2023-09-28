@@ -68,31 +68,48 @@ export type JSendMiddleware = {
   ) => void;
 };
 
+function checkObjectWithWhitelistKeys(
+  obj: object,
+  whitelistKeys: string[]
+): boolean {
+  const objKeys = Object.keys(obj);
+
+  for (let i = 0; i < objKeys.length; i += 1) {
+    if (!whitelistKeys.includes(objKeys[i])) {
+      return false;
+    }
+  }
+  return true;
+}
+
 /** The jSend object containing all functions. */
-export const jSend = {
+function jSendBase(config: { strictMode: boolean }) {
+  // config = config || {};
+  // host = host || {};
+
   /**
    * Creates a **successful** jSend object.
    * @param data Wrapper for data of any data type. No data should be set to null.
    * @returns Returns a successful jSend object.
    */
-  success: function (data: any): JSendSuccess {
+  function success(data: any): JSendSuccess {
     return {
       status: "success",
       data,
     };
-  },
+  }
 
   /**
    * Creates a **failed** jSend object.
    * @param data Wrapper for data of any data type. This data should specify why the rquest failed.
    * @returns Returns a failed jSend object.
    */
-  fail: function (data: any): JSendFail {
+  function fail(data: any): JSendFail {
     return {
       status: "fail",
       data,
     };
-  },
+  }
 
   /**
    * Creates an **error** jSend object.
@@ -100,7 +117,7 @@ export const jSend = {
    * @param optional Additional optional information of the error.
    * @returns
    */
-  error: function (messageOrErrorData: string | JSendErrorData): JSendError {
+  function error(messageOrErrorData: string | JSendErrorData): JSendError {
     if (typeof messageOrErrorData === "string") {
       return {
         status: "error",
@@ -114,92 +131,117 @@ export const jSend = {
         ...(messageOrErrorData.data && { data: messageOrErrorData.data }),
       };
     }
-  },
+  }
 
   /**
    * Testing if the `ref` parameter is a valid jSend success object.
    * @param ref The `ref` parameter to be tested.
    * @returns True if the `ref` parameter is a valid jSend success object, otherwise false;
    */
-  isSuccess: function (ref: any): ref is JSendSuccess {
+  function isSuccess(ref: any): ref is JSendSuccess {
     return (
       typeof ref === "object" &&
       typeof ref.status === "string" &&
       ref.status === "success" &&
-      ref.data !== undefined
+      ref.data !== undefined &&
+      (config.strictMode === false ||
+        checkObjectWithWhitelistKeys(ref, ["status", "data"]))
     );
-  },
+  }
 
   /**
    * Testing if the `ref` parameter is a valid jSend failed object.
    * @param ref The `ref` parameter to be tested.
    * @returns True if the `ref` parameter is a valid jSend failed object, otherwise false;
    */
-  isFail: function (ref: any): ref is JSendFail {
+  function isFail(ref: any): ref is JSendFail {
     return (
       typeof ref === "object" &&
       typeof ref.status === "string" &&
       ref.status === "fail" &&
-      ref.data !== undefined
+      ref.data !== undefined &&
+      (config.strictMode === false ||
+        checkObjectWithWhitelistKeys(ref, ["status", "data"]))
     );
-  },
+  }
 
   /**
    * Testing if the `ref` parameter is a valid jSend error object.
    * @param ref The `ref` parameter to be tested.
    * @returns True if the `ref` parameter is a valid jSend error object, otherwise false;
    */
-  isError: function (ref: any): ref is JSendError {
+  function isError(ref: any): ref is JSendError {
     return (
       typeof ref === "object" &&
       typeof ref.status === "string" &&
       ref.status === "error" &&
       typeof ref.message === "string" &&
-      (ref.code === undefined || typeof ref.message === "number")
+      (ref.code === undefined || typeof ref.message === "number") &&
+      (config.strictMode === false ||
+        checkObjectWithWhitelistKeys(ref, [
+          "status",
+          "message",
+          "code",
+          "data",
+        ]))
     );
-  },
+  }
 
   /**
    * Testing if the `ref` parameter is one of [{@link jSend.isSuccess}, {@link jSend.isFail}, {@link jSend.isError}].
    * @param ref The `ref` parameter to be tested.
    * @returns True if the `ref` parameter is one of [{@link jSend.isSuccess}, {@link jSend.isFail}, {@link jSend.isError}], otherwise false.
    */
-  isValid: function (ref: any): ref is JSend {
-    return this.isSuccess(ref) || this.isFail(ref) || this.isError(ref);
-  },
+  function isValid(ref: any): ref is JSend {
+    return isSuccess(ref) || isFail(ref) || isError(ref);
+  }
 
-  middleware: function (_req: any, res: any, next: any) {
-    const middleware: JSendMiddleware = {
-      send: function (jSendObject: JSend, httpStatusCode?: number) {
-        console.log("Calling Global");
-        // res.status(httpStatusCode || 200).json(jSendObject);
-        if (jSend.isSuccess(jSendObject)) {
-          res.status(httpStatusCode || 200).json(jSendObject);
-        } else if (jSend.isFail(jSendObject)) {
-          res.status(httpStatusCode || 400).json(jSendObject);
-        } else if (jSend.isError(jSendObject)) {
-          res.status(httpStatusCode || 500).json(jSendObject);
-        }
-      },
+  const publish = {
+    success,
+    fail,
+    error,
+    isValid,
+    isSuccess,
+    isFail,
+    isError,
+    middleware: function (_req: any, res: any, next: any) {
+      const middleware: JSendMiddleware = {
+        send: function (jSendObject: JSend, httpStatusCode?: number) {
+          console.log("Calling Global");
+          // res.status(httpStatusCode || 200).json(jSendObject);
+          if (isSuccess(jSendObject)) {
+            res.status(httpStatusCode || 200).json(jSendObject);
+          } else if (isFail(jSendObject)) {
+            res.status(httpStatusCode || 400).json(jSendObject);
+          } else if (isError(jSendObject)) {
+            res.status(httpStatusCode || 500).json(jSendObject);
+          }
+        },
 
-      sendSuccess: function (data: any, httpStatusCode?: number) {
-        res.status(httpStatusCode || 200).json(jSend.success(data));
-      },
+        sendSuccess: function (data: any, httpStatusCode?: number) {
+          res.status(httpStatusCode || 200).json(success(data));
+        },
 
-      sendFail: function (data: any, httpStatusCode?: number) {
-        res.status(httpStatusCode || 400).json(jSend.fail(data));
-      },
+        sendFail: function (data: any, httpStatusCode?: number) {
+          res.status(httpStatusCode || 400).json(fail(data));
+        },
 
-      sendError: function (
-        messageOrErrorData: string | JSendErrorData,
-        httpStatusCode?: number
-      ) {
-        res.status(httpStatusCode || 500).json(jSend.error(messageOrErrorData));
-      },
-    };
+        sendError: function (
+          messageOrErrorData: string | JSendErrorData,
+          httpStatusCode?: number
+        ) {
+          res.status(httpStatusCode || 500).json(error(messageOrErrorData));
+        },
+      };
 
-    res.jSend = middleware;
+      res.jSend = middleware;
 
-    next();
-  },
-};
+      next();
+    },
+  };
+
+  return publish;
+}
+
+export const jSend = jSendBase({ strictMode: false });
+export const jSendStrict = jSendBase({ strictMode: true });
