@@ -29,8 +29,44 @@ export type JSendError = {
 /** Union of `JSendSuccess`, `JSendFail`, and `JSendError`. */
 export type JSend = JSendSuccess | JSendFail | JSendError;
 
+/** Definition of the JSend Middleware. */
+export type JSendMiddleware = {
+  /**
+   *
+   * @param jSendObject
+   * @param httpStatusCode The HTTP status code to be used. If not defined then the default based on the type of the jSendObject will be used.
+   */
+  send: (jSendObject: JSend, httpStatusCode?: number) => void;
+
+  /**
+   * Creates and sends a **successful** jSend object.
+   * @param data Wrapper for data of any data type. No data should be set to null.
+   * @param httpStatusCode The HTTP status code (suppose to be in the 2xx range). If not defined then 200 will be used.
+   */
+  sendSuccess: (data: any, httpStatusCode?: number) => void;
+
+  /**
+   * Creates and sends a **failed** jSend object.
+   * @param data Wrapper for data of any data type. This data should specify why the rquest failed.
+   * @param httpStatusCode The HTTP status code (suppose to be in the 4xx range). If not defined then 400 will be used.
+   */
+  sendFail: (data: any, httpStatusCode?: number) => void;
+
+  /**
+   * Creates and sends an **error** jSend object.
+   * @param message A meaningful, end-user-readable (or at the least log-worthy) message, explaining what went wrong.
+   * @param optional Additional optional information of the error.
+   * @param httpStatusCode The HTTP status code (suppose to be in the 5xx range). If not defined then 500 will be used.
+   */
+  sendError: (
+    message: string,
+    optional?: { code?: number; data?: any },
+    httpStatusCode?: number
+  ) => void;
+};
+
 /** The jSend object containing all functions. */
-const jSend = {
+export const jSend = {
   /**
    * Creates a **successful** jSend object.
    * @param data Wrapper for data of any data type. No data should be set to null.
@@ -129,6 +165,40 @@ const jSend = {
   isValid: function (ref: any): ref is JSend {
     return this.isSuccess(ref) || this.isFail(ref) || this.isError(ref);
   },
-};
 
-export default jSend;
+  middleware: function (_req: any, res: any, next: any) {
+    const middleware: JSendMiddleware = {
+      send: function (jSendObject: JSend, httpStatusCode?: number) {
+        console.log("Calling Global");
+        // res.status(httpStatusCode || 200).json(jSendObject);
+        if (jSend.isSuccess(jSendObject)) {
+          res.status(httpStatusCode || 200).json(jSendObject);
+        } else if (jSend.isFail(jSendObject)) {
+          res.status(httpStatusCode || 400).json(jSendObject);
+        } else if (jSend.isError(jSendObject)) {
+          res.status(httpStatusCode || 500).json(jSendObject);
+        }
+      },
+
+      sendSuccess: function (data: any, httpStatusCode?: number) {
+        res.status(httpStatusCode || 200).json(jSend.success(data));
+      },
+
+      sendFail: function (data: any, httpStatusCode?: number) {
+        res.status(httpStatusCode || 400).json(jSend.fail(data));
+      },
+
+      sendError: function (
+        message: string,
+        optional?: { code?: number; data?: any },
+        httpStatusCode?: number
+      ) {
+        res.status(httpStatusCode || 500).json(jSend.error(message, optional));
+      },
+    };
+
+    res.jSend = middleware;
+
+    next();
+  },
+};
