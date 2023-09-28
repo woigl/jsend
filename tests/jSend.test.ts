@@ -1,12 +1,12 @@
-import { jSend } from "../src";
+import { jSend } from '../src';
 
-test("check the function isSuccess", () => {
-  const obj = {
-    status: "success",
-    data: null,
-  };
+test('check the function isSuccess', () => {
+    const obj = {
+        status: 'success',
+        data: null
+    };
 
-  const isJSendSuccess = jSend.isSuccess(obj);
+    const isJSendSuccess = jSend.isSuccess(obj);
 
-  expect(isJSendSuccess).toBeTruthy();
+    expect(isJSendSuccess).toBeTruthy();
 });
