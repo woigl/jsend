@@ -1,8 +1,10 @@
 # @woigl/jsend
 
-[![npm](https://img.shields.io/npm/v/@woigl/jsend.svg?style=svg&logo=npm&label=)](https://www.npmjs.com/package/@woigl/jsend)
+[![code style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
+![npm (scoped)](https://img.shields.io/npm/v/%40woigl/jsend?style=flat-square&logo=github)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](https://github.com/typeslick/status-code-enum/blob/master/LICENSE)
 
-Typescript and Javascript utilities and HTTP middleware for creating, sending and verifying of [JSend](https://github.com/omniti-labs/jsend) responses.
+TypeScript and JavaScript utilities and HTTP middleware for creating, sending and verifying [JSend](https://github.com/omniti-labs/jsend) responses.
 
 ### Installation
 
@@ -16,29 +18,29 @@ Responses can be created using the `success`, `fail`, and `error` methods:
 
 ```typescript
 // You can pass any data or a JSend response to success
-jSend.success({ foo: "bar" }); // { status: 'success', data: { foo: 'bar' } }
-jSend.success(["foo", "bar"]); // { status: 'success', data: [ 'foo', 'bar' ] }
-jSend.success("Some text"); // { status: 'success', data: 'Some text' }
+jSend.success({ foo: 'bar' }); // { status: 'success', data: { foo: 'bar' } }
+jSend.success(['foo', 'bar']); // { status: 'success', data: [ 'foo', 'bar' ] }
+jSend.success('Some text'); // { status: 'success', data: 'Some text' }
 jSend.success(4711); // { status: 'success', data: 4711 }
 jSend.success(false); // { status: 'success', data: false }
 jSend.success(null); // { status: 'success', data: null }
 
 // You can pass any data or a JSend response to fail
-jSend.fail({ reason: "Some reason text" }); // { status: 'fail', data: { reason: 'Some reason text' } }
-jSend.fail({ code: "NOT_EXISTING" }); // { status: 'fail', data: { code: 'NOT_EXISTING' } }
+jSend.fail({ reason: 'Some reason text' }); // { status: 'fail', data: { reason: 'Some reason text' } }
+jSend.fail({ code: 'NOT_EXISTING' }); // { status: 'fail', data: { code: 'NOT_EXISTING' } }
 
 // You can pass a message or an object with a message and optionally data and code
-jSend.error("That just failed!"); // { status: 'error', message: 'That just failed!' }
+jSend.error('That just failed!'); // { status: 'error', message: 'That just failed!' }
 jSend.error({
-  code: 123,
-  message: "That just failed!",
+    code: 123,
+    message: 'That just failed!'
 }); // { status: 'error', code: 123, message: 'That just failed!' }
 jSend.error({
-  code: 123,
-  message: "That just failed!",
-  data: {
-    stack: "...",
-  },
+    code: 123,
+    message: 'That just failed!',
+    data: {
+        stack: '...'
+    }
 }); // { status: 'error', code: 123, message: 'That just failed!', data: { stack: '...' } }
 ```
 
@@ -70,20 +72,20 @@ By default `jSend.isValid` validates that all required properties exist.
 ```typescript
 // Returns true
 jSend.isValid({
-  status: "success",
-  data: { foo: "bar" },
+    status: 'success',
+    data: { foo: 'bar' }
 });
 
 // Returns false
 jSend.isValid({
-  status: "success",
+    status: 'success'
 });
 
 // Returns true
 jSend.isValid({
-  status: "success",
-  data: { foo: "bar" },
-  junk: "is ok",
+    status: 'success',
+    data: { foo: 'bar' },
+    junk: 'is ok'
 });
 ```
 
@@ -92,20 +94,20 @@ Using `jSendStrict.isValid` instead of `jSend.isValid` causes to also validate t
 ```typescript
 // Returns true
 jSend.isValid({
-  status: "success",
-  data: { foo: "bar" },
+    status: 'success',
+    data: { foo: 'bar' }
 });
 
 // Returns false
 jSend.isValid({
-  status: "success",
+    status: 'success'
 });
 
 // Returns false
 jSend.isValid({
-  status: "success",
-  data: { foo: "bar" },
-  junk: "is ok",
+    status: 'success',
+    data: { foo: 'bar' },
+    junk: 'is ok'
 });
 ```
 
@@ -116,14 +118,14 @@ You can also check if a response is a "success" response.
 ```typescript
 // Returns true
 jSend.isSuccess({
-  status: "success",
-  data: { foo: "bar" },
+    status: 'success',
+    data: { foo: 'bar' }
 });
 
 // Returns false
 jSend.isSuccess({
-  status: "error",
-  data: { stack: "..." },
+    status: 'error',
+    data: { stack: '...' }
 });
 ```
 
@@ -136,14 +138,14 @@ You can also check if a response is a "fail" response.
 ```typescript
 // Returns true
 jSend.isFail({
-  status: "fail",
-  data: { foo: "bar" },
+    status: 'fail',
+    data: { foo: 'bar' }
 });
 
 // Returns false
 jSend.isFail({
-  status: "error",
-  data: { stack: "..." },
+    status: 'error',
+    data: { stack: '...' }
 });
 ```
 
@@ -157,15 +159,15 @@ You can also check if a response is an "error" response.
 // Returns true
 
 jSend.isError({
-  status: "error",
-  message: "Error message",
-  data: { stack: "..." },
+    status: 'error',
+    message: 'Error message',
+    data: { stack: '...' }
 });
 
 // Returns false
 jSend.isError({
-  status: "success",
-  data: { foo: "bar" },
+    status: 'success',
+    data: { foo: 'bar' }
 });
 ```
 
